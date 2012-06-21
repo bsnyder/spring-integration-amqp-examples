@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.emc.consulting.blackhawk.core.domain.Project;
+//import com.emc.consulting.blackhawk.core.domain.Project;
 
 public class ProducerApp {
 	

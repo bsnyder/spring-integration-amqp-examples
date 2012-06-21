@@ -3,7 +3,7 @@ package org.bsnyder.spring.amqp.async.consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.emc.consulting.blackhawk.core.domain.Project;
+//import com.emc.consulting.blackhawk.core.domain.Project;
 
 public class MyListener {
 	
