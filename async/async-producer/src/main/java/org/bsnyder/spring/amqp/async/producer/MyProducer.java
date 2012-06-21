@@ -7,7 +7,7 @@ import com.emc.consulting.blackhawk.core.domain.Project;
 
 public interface MyProducer {
 	
-//	public Frisbee send(Frisbee frisbee);
-	public Future<Project> send(Project project);
+	public Future<Frisbee> send(Frisbee frisbee);
+//	public Future<Project> send(Project project);
 
 }
