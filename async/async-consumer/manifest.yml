@@ -1,0 +1,16 @@
+---
+applications:
+  target/appassembler/:
+    name: async-consumer
+    framework:
+      name: spring
+      info:
+        mem: 512M
+        description: Java SpringSource Spring Application
+        exec: 
+    url: ${name}.${target-base}
+    mem: 128M
+    instances: 1
+    services:
+      rabbitmq-7ad42:
+        type: rabbitmq

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:p="http://www.springframework.org/schema/p" xmlns:int-amqp="http://www.springframework.org/schema/integration/amqp"
+  xmlns:int="http://www.springframework.org/schema/integration" xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+  xsi:schemaLocation="http://www.springframework.org/schema/integration/amqp http://www.springframework.org/schema/integration/amqp/spring-integration-amqp-2.1.xsd
+		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-2.1.xsd
+		http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit-1.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <rabbit:admin connection-factory="connectionFactory" />
+
+  <rabbit:connection-factory id="connectionFactory" username="guest" password="guest" port="5672" />
+
+  <bean id="jsonMessageConverter" class="org.springframework.amqp.support.converter.JsonMessageConverter" />
+
+  <!-- Need the message-converter attr here so that messages are serialized -->
+  <rabbit:template id="rabbitTemplate" connection-factory="connectionFactory" message-converter="jsonMessageConverter" />
+
+  <rabbit:queue id="request.queue" name="TEST.FOO.REQUEST" />
+  <rabbit:queue id="reply.queue" name="TEST.FOO.REPLY" />
+
+  <bean id="listener" class="org.bsnyder.spring.amqp.async.consumer.MyListener" />
+
+  <!-- <rabbit:listener-container connection-factory="connectionFactory"> <rabbit:listener ref="listener" queues="request.queue"/> 
+    </rabbit:listener-container> -->
+
+  <int:logging-channel-adapter id="loggingChannel" log-full-message="true" level="INFO" />
+
+  <int:channel id="fromRabbit">
+    <int:interceptors>
+      <int:wire-tap channel="loggingChannel" />
+    </int:interceptors>
+  </int:channel>
+
+  <!-- Need the message-converter attr here so that messages are deserialized -->
+  <int-amqp:inbound-channel-adapter id="inbound" channel="fromRabbit" queue-names="TEST.FOO.REQUEST"
+    connection-factory="connectionFactory" message-converter="jsonMessageConverter" />
+
+  <int:service-activator input-channel="fromRabbit" output-channel="toRabbit" ref="listener"
+    method="onMessage" />
+
+  <int:channel id="toRabbit">
+    <int:interceptors>
+      <int:wire-tap channel="loggingChannel" />
+    </int:interceptors>
+  </int:channel>
+
+  <rabbit:direct-exchange name="replyExchange">
+    <rabbit:bindings>
+      <rabbit:binding queue="reply.queue" key="my.test.key" />
+    </rabbit:bindings>
+  </rabbit:direct-exchange>
+
+  <int-amqp:outbound-channel-adapter id="outbound" channel="toRabbit" amqp-template="rabbitTemplate"
+    exchange-name="replyExchange" routing-key="my.test.key" />
+
+</beans>
