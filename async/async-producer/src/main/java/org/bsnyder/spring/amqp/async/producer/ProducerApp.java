@@ -16,14 +16,16 @@ public class ProducerApp {
 			new ClassPathXmlApplicationContext("/META-INF/spring/producer-context.xml", ProducerApp.class);
 		MyProducer producer = (MyProducer) context.getBean("producer");
 		
-		Frisbee frisbee = null;
+//		Frisbee frisbee = null;
 		for (int i = 0; i < 10; ++i) {
-            frisbee = new Frisbee(i, "Hello");
+			String str = "Hello" + i;
+			producer.send(str);
+//            frisbee = new Frisbee(i, "Hello");
 //            frisbee.setMessageNumber(i);
 //            frisbee.appendToMessage("Hello");
-            LOG.debug("###### Sending frisbee: {}", frisbee);
-			  producer.send(frisbee);
-			  LOG.debug("###### After the send has occurred");
+//            LOG.debug("###### Sending frisbee: {}", frisbee);
+//			  producer.send(frisbee);
+//			  LOG.debug("###### After the send has occurred");
 //			Project project = new Project();
 //			project.setId("" + i);
 //			project.setName("fooProject");

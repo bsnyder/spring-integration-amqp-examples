@@ -7,7 +7,8 @@ import java.util.concurrent.Future;
 
 public interface MyProducer {
 	
-	public Future<Frisbee> send(Frisbee frisbee);
+//	public Future<Frisbee> send(Frisbee frisbee);
+	public Future<String> send(String str);
 //	public Future<Project> send(Project project);
 
 }

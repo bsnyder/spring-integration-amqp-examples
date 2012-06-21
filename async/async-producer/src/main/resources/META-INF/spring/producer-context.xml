@@ -19,11 +19,13 @@
   <rabbit:queue id="request.queue" name="TEST.FOO.REQUEST" />
   <rabbit:queue id="reply.queue" name="TEST.FOO.REPLY" />
 
+  <!--
   <rabbit:direct-exchange name="requestExchange">
     <rabbit:bindings>
       <rabbit:binding queue="request.queue" key="my.test.key" />
     </rabbit:bindings>
   </rabbit:direct-exchange>
+  -->
 
   <int:channel id="toRabbit">
     <int:interceptors>
@@ -33,8 +35,9 @@
 
   <int:logging-channel-adapter id="loggingChannel" log-full-message="true" level="INFO" />
 
+  <!-- No exchange-name attr here b/c we're using the default exchange -->
   <int-amqp:outbound-channel-adapter id="outbound" channel="toRabbit" amqp-template="rabbitTemplate"
-    exchange-name="requestExchange" routing-key="my.test.key" />
+    routing-key="my.test.key" />
 
   <int:gateway id="producer" service-interface="org.bsnyder.spring.amqp.async.producer.MyProducer"
     default-request-channel="toRabbit" default-reply-channel="fromRabbit" />
