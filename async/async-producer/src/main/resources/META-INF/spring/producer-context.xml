@@ -3,7 +3,7 @@
   xmlns:p="http://www.springframework.org/schema/p" xmlns:rabbit="http://www.springframework.org/schema/rabbit"
   xmlns:int="http://www.springframework.org/schema/integration" xmlns:int-amqp="http://www.springframework.org/schema/integration/amqp"
   xsi:schemaLocation="http://www.springframework.org/schema/integration/amqp http://www.springframework.org/schema/integration/amqp/spring-integration-amqp-2.1.xsd
-		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-2.1.xsd
+		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-2.2.xsd
 		http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit-1.1.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
@@ -13,19 +13,19 @@
 
   <bean id="jsonMessageConverter" class="org.springframework.amqp.support.converter.JsonMessageConverter" />
 
-  <!-- Need the message-converter attr here so that messages are serialized -->
-  <rabbit:template id="rabbitTemplate" connection-factory="connectionFactory" message-converter="jsonMessageConverter" />
+  <rabbit:template id="rabbitTemplate" connection-factory="connectionFactory" message-converter="jsonMessageConverter"
+    reply-queue="TEST.FOO.REPLY">
+    <rabbit:reply-listener />
+    </rabbit:template>
 
   <rabbit:queue id="request.queue" name="TEST.FOO.REQUEST" />
   <rabbit:queue id="reply.queue" name="TEST.FOO.REPLY" />
 
-  <!--
   <rabbit:direct-exchange name="requestExchange">
     <rabbit:bindings>
       <rabbit:binding queue="request.queue" key="my.test.key" />
     </rabbit:bindings>
   </rabbit:direct-exchange>
-  -->
 
   <int:channel id="toRabbit">
     <int:interceptors>
@@ -35,25 +35,10 @@
 
   <int:logging-channel-adapter id="loggingChannel" log-full-message="true" level="INFO" />
 
-  <!-- No exchange-name attr here b/c we're using the default exchange -->
-  <int-amqp:outbound-channel-adapter id="outbound" channel="toRabbit" amqp-template="rabbitTemplate"
-    routing-key="my.test.key" />
+  <int-amqp:outbound-gateway request-channel="toRabbit" amqp-template="rabbitTemplate"
+    exchange-name="requestExchange" routing-key="my.test.key" />
 
   <int:gateway id="producer" service-interface="org.bsnyder.spring.amqp.async.producer.MyProducer"
-    default-request-channel="toRabbit" default-reply-channel="fromRabbit" />
-
-  <int:channel id="fromRabbit">
-    <int:interceptors>
-      <int:wire-tap channel="loggingChannel" />
-    </int:interceptors>
-  </int:channel>
-
-  <!-- Need the message-converter attr here so that messages are deserialized -->
-  <!--
-  <int-amqp:inbound-channel-adapter id="inbound" channel="fromRabbit" queue-names="TEST.FOO.REPLY"
-    connection-factory="connectionFactory" message-converter="jsonMessageConverter" />
-  -->
-
-  <!-- <int:poller id="poller" default="true" fixed-delay="1000" /> -->
+    default-request-channel="toRabbit" />
 
 </beans>
